@@ -1,16 +1,12 @@
 from hcvm.MemoryContainer import MemoryConatiner
 from hcvm.Instructions import *
 from hcvm.VMValue import VMValue
+from hcvm.executor.ByteReader import read_program_binary
+from hcvm.executor.ProgramInterpreter import ProgramInterpreter
 
-memcont = MemoryConatiner(4096)
+import struct
 
-tr = VMValue("r0")
-sr = VMValue("r1")
+program = read_program_binary("test_bins/o.bin")
+VM = ProgramInterpreter(program=program)
 
-target_inst = SWL()
-target_inst.set_change_targets(tr, sr)
-print(target_inst.iden, target_inst.opcode)
-
-ser = target_inst.serialize()
-memcont.set_bytes(0, values=ser)
-print(memcont.memory)
+VM.run()
