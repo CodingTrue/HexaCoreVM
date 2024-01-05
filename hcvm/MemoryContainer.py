@@ -21,3 +21,13 @@ class MemoryConatiner:
     def set_bytes(self, start_address: int = 0, values: list[int] = [0]):
         for i in range(len(values)):
             self.memory[(start_address + i) % self.size] = values[i]
+
+    def get_static_value(self) -> int:
+        return int.from_bytes(self.memory, byteorder="big", signed=False)
+
+    def increase_static_value(self, value: int = 0):
+        target_value = self.get_static_value() + value
+        self.memory = int.to_bytes(target_value, byteorder="big", signed=False, length=target_value)
+
+    def decrease_static_value(self, value: int = 0):
+        self.increase_static_value(-value)
