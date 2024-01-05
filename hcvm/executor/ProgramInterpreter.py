@@ -7,18 +7,22 @@ class ProgramInterpreter:
         self.is_running = False
 
         self.register = {
-            "pc": MemoryConatiner(0xffff),
-            "mar": MemoryConatiner(0xffff),
-            "instr_1": MemoryConatiner(0xff),
-            "instr_2": MemoryConatiner(0xff),
-            "instr_3": MemoryConatiner(0xff),
-            "instr_4": MemoryConatiner(0xff),
-            "instr_step_c": MemoryConatiner(0xf),
-            "inst_rom_1": MemoryConatiner(0x800),
-            "inst_rom_2": MemoryConatiner(0x800),
-            "inst_rom_3": MemoryConatiner(0x800),
-            "flag_r": MemoryConatiner(0x02)
+            "pc": MemoryConatiner(4),
+            "mar": MemoryConatiner(4),
+            "instr_1": MemoryConatiner(2),
+            "instr_2": MemoryConatiner(2),
+            "instr_3": MemoryConatiner(2),
+            "instr_4": MemoryConatiner(2),
+            "instr_step_c": MemoryConatiner(1),
+            "inst_rom_1": MemoryConatiner(2),
+            "inst_rom_2": MemoryConatiner(2),
+            "inst_rom_3": MemoryConatiner(2),
+            "flag_r": MemoryConatiner(1)
         }
+        self.bus = 0x00
+
+    def tick(self):
+        self.register[0]
 
     def run(self):
-        print(self.program)
+        self.tick()

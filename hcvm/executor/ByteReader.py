@@ -1,4 +1,4 @@
-from hcvm.Instructions import Instruction
+from hcvm.Instructions import Instruction, build_instruction
 import struct
 
 def read_program_binary(filename: str = "") -> list[Instruction]:
@@ -13,5 +13,5 @@ def read_program_binary(filename: str = "") -> list[Instruction]:
             data = [int.from_bytes(x, "big", signed=False) for x in struct.unpack(">cccc", content[i:i + 4])]
             if data[0] == 0: continue
 
-            result.append(data)
+            result.append(build_instruction(data))
     return result
