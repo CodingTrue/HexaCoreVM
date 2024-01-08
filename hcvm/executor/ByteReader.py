@@ -1,4 +1,6 @@
 from hcvm.Instructions import Instruction, build_instruction
+from hcvm.MemoryContainer import MemoryConatiner
+from os import getcwd
 import struct
 
 def read_program_binary(filename: str = "") -> list[Instruction]:
@@ -14,4 +16,13 @@ def read_program_binary(filename: str = "") -> list[Instruction]:
             if data[0] == 0: continue
 
             result.append(build_instruction(data))
+    return result
+
+def create_memory_container_from_binary(filename: str = "") -> MemoryConatiner:
+    result = None
+    with open(getcwd() + filename, "rb") as f:
+        content = f.read()
+
+        result = MemoryConatiner(size=len(content))
+        result.memory = content
     return result
