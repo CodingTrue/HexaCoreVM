@@ -5,7 +5,7 @@ import struct
 
 def read_program_binary(filename: str = "") -> list[Instruction]:
     result = []
-    with open(filename, "rb") as f:
+    with open(getcwd() + filename, "rb") as f:
         content = f.read()
         iterations = int(len(content) / 4)
 
@@ -17,6 +17,10 @@ def read_program_binary(filename: str = "") -> list[Instruction]:
 
             result.append(build_instruction(data))
     return result
+
+def load_program_memory(filename: str = "", memory: MemoryConatiner = None):
+    with open(getcwd() + filename, "rb") as f:
+        memory.memory = f.read()
 
 def create_memory_container_from_binary(filename: str = "") -> MemoryConatiner:
     result = None

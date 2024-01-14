@@ -4,7 +4,7 @@ from hcvm.executor.ByteReader import create_memory_container_from_binary
 from hcvm.executor.ControlSignal import *
 
 class ProgramInterpreter:
-    def __init__(self, program: list[Instruction]):
+    def __init__(self, program: list[Instruction] = []):
         self.program = program
         self.is_running = False
 
@@ -24,7 +24,10 @@ class ProgramInterpreter:
             "flag_r": MemoryConatiner(1)
         }
         self.bus = 0x00
-        self.alu = 0x00
+        self.memory = MemoryConatiner(65535)
+
+        for i, inst in enumerate(self.program):
+            self.memory.set_bytes(i*4, inst.serialize())
 
     def is_cs_set(self, target: int = 0) -> bool:
         return self.control_signal & target == target
