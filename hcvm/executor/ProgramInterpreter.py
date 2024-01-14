@@ -2,6 +2,7 @@ from hcvm.Instructions import Instruction
 from hcvm.MemoryContainer import MemoryConatiner
 from hcvm.executor.ByteReader import create_memory_container_from_binary
 from hcvm.executor.ControlSignal import *
+from hcvm.hardwareport.RegisterFile import RegisterFile
 
 class ProgramInterpreter:
     def __init__(self, program: list[Instruction] = []):
@@ -10,6 +11,7 @@ class ProgramInterpreter:
 
         self.control_signal = 0
         self.memory = MemoryConatiner(0xffff)
+        self.registerFile = RegisterFile()
         self.register = {
             "pc": MemoryConatiner(4),
             "mar": MemoryConatiner(4),
@@ -24,7 +26,6 @@ class ProgramInterpreter:
             "flag_r": MemoryConatiner(1)
         }
         self.bus = 0x00
-        self.memory = MemoryConatiner(65535)
 
         for i, inst in enumerate(self.program):
             self.memory.set_bytes(i*4, inst.serialize())
@@ -39,31 +40,43 @@ class ProgramInterpreter:
     def tick(self):
         self.control_signal = self.read_control_signal()
 
+        # TODO: rearange statements that write to bus to be at top
+
+        # WRITE CONTROL SIGNAL
+        if self.is_cs_set(CO): self.bus = self.register["pc"].get_static_value()
+        if self.is_cs_set(MRE): self.bus = self.memory.get_byte(address=self.register["mar"].get_static_value())
+
+        # READ CONTROL SIGNAL
         if self.is_cs_set(CE):
             if not self.is_cs_set(CRI): self.register["pc"].increase_static_value(value=1)
             else: self.register["pc"].decrease_static_value(value=1)
-        if self.is_cs_set(CO): self.bus = self.register["pc"].get_static_value()
         if self.is_cs_set(CL): self.register["pc"].set_static_value(value=self.bus)
         if self.is_cs_set(MARI): self.register["mar"].set_static_value(value=self.bus)
-        if self.is_cs_set(MWE): pass
-        if self.is_cs_set(MRE): pass
         if self.is_cs_set(IRI_1): self.register["instr_1"].set_static_value(value=self.bus)
         if self.is_cs_set(IRI_2): self.register["instr_2"].set_static_value(value=self.bus)
         if self.is_cs_set(IRI_3): self.register["instr_3"].set_static_value(value=self.bus)
         if self.is_cs_set(IRI_4): self.register["instr_4"].set_static_value(value=self.bus)
+        if self.is_cs_set(MWE): self.memory.set_byte(address=self.register["mar"].get_static_value(), value=self.bus)
+
         if self.is_cs_set(EO): pass
         if self.is_cs_set(EMODE): pass
         if self.is_cs_set(ESE): pass
         if self.is_cs_set(ECIN): pass
         if self.is_cs_set(ESL): pass
         if self.is_cs_set(EE): pass
-        if self.is_cs_set(RFWE): pass
+        if self.is_cs_set(RFWE): self.registerFile.write()
         if self.is_cs_set(FOSP): pass
         if self.is_cs_set(SPI): pass
         if self.is_cs_set(UFR): pass
         if self.is_cs_set(IOR): pass
         if self.is_cs_set(IOW): pass
         if self.is_cs_set(HLT): input("CPU HALTED")
+
+        st_register = self.register["instr_2"].get_static_value()
+
+        self.registerFile.writeData = self.bus
+        self.registerFile.writeAddr = st_register & 0xf
+        self.register["instr_step_c"].increase_static_value(value=1)
 
     def run(self):
         self.tick()
